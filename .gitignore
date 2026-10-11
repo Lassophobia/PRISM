@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 构建产物（spec 本身要提交，build/ 里的中间产物不要）
+build/work/
+build/dist/
+build/*.toc
+
+# 运行期
+*.log
+*.tmp
+*.bak
+*.before-*
+
+# 本机私有（换机包会按目标机生成）
+paths.json
+config.json
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

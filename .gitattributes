@@ -1,0 +1,11 @@
+# 换行符统一：仓库内一律 LF，只有 Windows 批处理强制 CRLF（cmd 对 LF 的 goto/label 不稳）
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 二进制（别做文本转换 / 行尾处理）
+*.png binary
+*.jpg binary
+*.ico binary
+*.exe binary
+*.dll binary
