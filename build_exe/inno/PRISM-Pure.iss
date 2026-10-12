@@ -3,7 +3,7 @@
 ; 编译：
 ;   ISCC.exe build_exe\inno\PRISM.iss
 ; 产物：
-;   dist_transfer\PRISM-换机包\1-安装 PRISM.exe
+;   dist_transfer\PRISM-纯净版\PRISM 纯净版.exe
 ;
 ; 设计要点（对应换机 8 问题）：
 ;   ① 目录页用 Inno **内置**的那张（默认值 = 非系统盘第一个盘根下的 PRISM）⇒ 用户可改任意位置
@@ -31,7 +31,7 @@ DisableDirPage=no
 DisableProgramGroupPage=yes
 AllowNoIcons=yes
 OutputDir=..\..\dist_transfer\PRISM-纯净版
-OutputBaseFilename=1-安装 PRISM 纯净版
+OutputBaseFilename=PRISM 纯净版
 SetupIconFile=..\prism.ico
 UninstallDisplayIcon={app}\assets\prism.ico
 Compression=lzma2/max

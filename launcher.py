@@ -475,7 +475,7 @@ def repair_paths():
         log("[!] 路径重定位没成功（rc=%s）" % rc)
         notify("PRISM 找不到游戏",
                "PRISM 之前记住的英雄联盟目录不可用了，自动也没找到新的位置。\n\n"
-               "· 如果刚重装过游戏：重新运行一次「1-安装 PRISM.exe」把路径再选一遍\n"
+               "· 如果刚重装过游戏：重新运行一次「PRISM 完整版.exe」把路径再选一遍\n"
                "· 日志：%s" % LOG, MB_ICONWARNING)
 
 

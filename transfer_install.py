@@ -6,10 +6,10 @@ PRISM 换机一键安装器
 
 用法
 ----
-    整包拷到新机器 → 双击 `1-安装 PRISM.exe` → **在弹出的窗口里选英雄联盟的安装目录** → 完事。
+    整包拷到新机器 → 双击 `PRISM 完整版.exe` → **在弹出的窗口里选英雄联盟的安装目录** → 完事。
 
     （探测到的最可能位置会**预选**好，直接点「确定」就行。）
-    （非交互：`1-安装 PRISM.exe "D:\\你的英雄联盟目录"`）
+    （非交互：`PRISM 完整版.exe "D:\\你的英雄联盟目录"`）
 
 它做什么
 --------
@@ -34,7 +34,7 @@ PRISM 换机一键安装器
 构建
 ----
     python -m PyInstaller --onefile --console --uac-admin \
-        --name "1-安装 PRISM" --paths . \
+        --name "PRISM" --paths . \
         --collect-submodules prism_inject transfer_install.py
     （`--uac-admin`：激活 Pengu 要写 HKLM，必须提权。用户点一次 UAC 后全程顺畅。）
 """
@@ -431,7 +431,7 @@ def main() -> int:
         log("")
         log("[X] 没选目录，什么都没动。退出。")
         log("  （想手动指定：在命令提示符里跑")
-        log("     \"1-安装 PRISM.exe\" \"D:\\你的英雄联盟目录\"）")
+        log("     \"PRISM 完整版.exe\" \"D:\\你的英雄联盟目录\"）")
         return 2
 
     log("")
