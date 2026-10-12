@@ -1,14 +1,6 @@
 # PRISM · 英雄联盟国服客户端增强
 
 <p align="center">
-  <a href="../../releases"><img src="https://img.shields.io/github/v/release/Lassophobia/PRISM?style=flat-square" alt="Release"></a>
-  &nbsp;
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/Lassophobia/PRISM?style=flat-square" alt="License"></a>
-  &nbsp;
-  <a href="../../stargazers"><img src="https://img.shields.io/github/stars/Lassophobia/PRISM?style=flat-square" alt="Stars"></a>
-</p>
-
-<p align="center">
   <img src="loadinglogo/prism-loading-logo.png" alt="PRISM" width="160">
 </p>
 
@@ -207,11 +199,7 @@
 
 ### 🎨 其它
 
-| 功能 | 说明 |
-|------|------|
-| **选人界面炫彩名补全** | 选人时把炫彩名显示完整 |
-| **loading 页标识** | 客户端启动的 loading 界面显示 PRISM 标识 |
-| **自我改名** | 面板里的「召唤师名字」栏，复刻时的假名同步靠它 |
+另外，同时制作了带**游戏内显示选人界面选中皮肤**的版本，但由于**涉及违反拳头协议**不采取开源政策，并且**小概率导致账号被 BAN**，如果真有需要的可以联系 QQ：**396469047**（注明来意）。
 
 ---
 
@@ -262,8 +250,7 @@
 1. **本程序只修改客户端里你看到的东西**，不往游戏里塞任何东西，也不会影响对局的公平性。
 2. **每天都要按顺序来** —— 先双击桌面 PRISM 等「已就绪」，再开客户端。不先开它，功能不会生效。
 3. **段位伪装、主页复刻这类只影响显示**，不会改动真实数据。
-4. **有可能被临时封号（一天 / 三天 / 七天）** —— 毕竟是改了客户端。**一句话：怕别用，用别怕。**
-5. 遇到问题先看[出问题了怎么办](#-出问题了怎么办)，尤其是那两个日志文件。
+4. 遇到问题先看[出问题了怎么办](#-出问题了怎么办)，尤其是那两个日志文件。
 
 ---
 
