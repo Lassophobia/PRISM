@@ -7749,7 +7749,10 @@ html.${NS}-ctrophy .style-profile-trophy-component .style-profile-emblem-header:
     const fslots = forgeTokenSlots();   
     for (let i = 0; i < slots.length && i < TOKEN_SLOT_N; i++) {
       const s = fslots ? fslots[i] : state.regaliaSlots[i];
-      if (!s || !s.url) continue;
+      if (!s || !s.url) {
+        if (fslots) n += clearSlotAt(i);
+        continue;
+      }
       n += paintSlotAt(i, s.url, force === true, s.id);
     }
     n += applyBannerSlots(force);
