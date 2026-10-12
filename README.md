@@ -17,13 +17,13 @@
 
 ---
 
-**PRISM 只改客户端大厅里你看到的东西**：召唤师信息、个人主页、身份标识、对局记录、战利品开箱……
-**不往游戏里塞任何东西，不碰游戏进程，不影响对局公平性。**
-
 > [!WARNING]
 > **该项目大部分内容为 AI 产物，且处于开发初期，可能会出现各种 BUG**，有能力的可以根据源码自行修改，但**请勿用作商用**，一旦发现该项目将直接下线。
 >
 > 另外该项目在开发初期参考了很多 GitHub 上前辈开源项目，如：[WJZ-P/sona](https://github.com/WJZ-P/sona)；[hosnye/skinforge](https://github.com/hosnye/skinforge)；[Alban1911/Rose](https://github.com/Alban1911/Rose)；[LeagueToolkit/cslol-manager](https://github.com/LeagueToolkit/cslol-manager)；[PenguLoader/PenguLoader](https://github.com/PenguLoader/PenguLoader)。**感谢各位前辈的开源，没有各位前辈就不会有该项目，再次向各位前辈致敬！**
+
+**PRISM 只改客户端大厅里你看到的东西**：召唤师信息、个人主页、身份标识、对局记录、战利品开箱……
+**不往游戏里塞任何东西，不碰游戏进程，不影响对局公平性。**
 
 <p align="center">
   <img src="images/panel.png" alt="PRISM 面板" width="100%">
