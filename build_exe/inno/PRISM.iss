@@ -16,7 +16,7 @@
 ; ---------------------------------------------------------------------------
 
 #define MyAppName "PRISM"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "罔生"
 #define SrcPayload "..\..\dist_transfer\_payload_staging"
 

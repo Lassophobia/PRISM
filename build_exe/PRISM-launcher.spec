@@ -45,6 +45,7 @@ exe = EXE(
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
+    uac_admin=True,                     # ★ 2026-10-13：自带管理员清单 —— 写/还原 IFEO（Pengu 激活项）要用
     icon=_ICO if os.path.isfile(_ICO) else None,
     disable_windowed_traceback=False,
     argv_emulation=False,

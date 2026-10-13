@@ -8,11 +8,15 @@ WHAT IT DOES
     3. 确保 **Pengu 已激活**（写 IFEO，让客户端加载我们的 core.dll）—— 幂等，已激活就跳过
     4. 弹一个提示：「可以启动客户端了」
     5. **等客户端（LeagueClientUx.exe）出现 → 等它退出**
-    6. 客户端退出 ⇒ 把 watcher 和后端一起收掉
+    6. 客户端退出 ⇒ 把 watcher 和后端一起收掉，并**还原 IFEO**
+       （客户端回到"没装注入器"的原生状态 —— 不开 PRISM 就不会有注入器残留）
 
 ★ 启动链**完全由我们自己组装**：
   起 helper → 激活 Pengu → 提示就绪 → 等客户端退出 → 收 helper。
-  "起 helper → 激活 Pengu → 提示就绪 → 等客户端退出 → 收 helper"。
+
+★ 本程序**自带管理员清单**（PyInstaller `uac_admin=True`）：双击时弹一次 UAC，
+  之后「写 IFEO（激活）」和「还原 IFEO（收工）」都在这一次授权里完成 ——
+  IFEO 在 HKLM，只有管理员能改。这是"用完即走"的前提。
 
 ★ 为什么生命周期挂在"客户端"上（选定的方案）：
   双击只做**就绪**（客户端你自己开）；**你关掉客户端，它自己收工** —— 零开机自启项。
@@ -32,6 +36,7 @@ WHAT IT DOES
 
 import ctypes
 import ctypes.wintypes as wt
+import json
 import os
 import shutil
 import socket
@@ -45,8 +50,12 @@ def _prism_home() -> str:
 
     ★ 为什么这里要自己写一份：本脚本会被 PyInstaller 打成**独立 exe**（不带 prism_inject），
       运行时 import 不到那个包。⇒ **改动时两处一起改**，别只改一边。
-    顺序：`PRISM_HOME` 环境变量 → **exe 自定位** → 注册表 `HKCU\Software\PRISM\Home`
+    顺序：`PRISM_HOME` 环境变量 → **exe 自定位** → 注册表 `Home`（**HKCU 优先，其次 HKLM**）
           → `%LOCALAPPDATA%\PRISM`。
+
+    ★ 两个 hive 都要读 —— 跟 `prism_inject/paths.py::_reg_home` 一致。安装器在提权上下文里跑的，
+      指针**可能写在 HKLM**（本机实测就是：HKLM 有 `Home=D:\PRISM`，HKCU 反而没有）
+      ⇒ 只读 HKCU 会漏，然后掉进兜底拿到一个**错的家**（备份文件、日志全找不着）。
     """
     v = (os.environ.get("PRISM_HOME") or "").strip()
     if v:
@@ -60,10 +69,14 @@ def _prism_home() -> str:
         pass
     try:
         import winreg
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\PRISM") as k:
-            h, _t = winreg.QueryValueEx(k, "Home")
-            if h and os.path.isdir(h):
-                return h
+        for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+            try:
+                with winreg.OpenKey(hive, r"Software\PRISM") as k:
+                    h, _t = winreg.QueryValueEx(k, "Home")
+                    if h and os.path.isdir(h):
+                        return h
+            except Exception:
+                continue
     except Exception:
         pass
     return os.path.join((os.environ.get("LOCALAPPDATA") or ""), "PRISM")
@@ -97,6 +110,7 @@ PATHS_JSON = os.path.join(HOME, "paths.json")
 
 IFEO_KEY = (r"SOFTWARE\Microsoft\Windows NT\CurrentVersion"
             r"\Image File Execution Options\LeagueClientUx.exe")
+IFEO_BACKUP = os.path.join(HOME, "uninstall", "pengu-orig.json")
 CLIENT_IMAGE = "LeagueClientUx.exe"
 CLIENT_APPEAR_TIMEOUT = 30 * 60
 CLIENT_GONE_GRACE = 45
@@ -352,6 +366,62 @@ def ensure_pengu():
         log("Pengu 激活成功（IFEO → %s）" % ifeo_debugger())
         return True, "已激活"
     return False, ("跑完了 --install，但 IFEO 没指到我们的 core.dll（现在=%r）" % cur)
+
+
+def backup_ifeo() -> None:
+    """激活前把**原始** IFEO 记一份（只在没有备份时写一次，供收工/卸载还原）。
+
+    ★ 只记"不是我们写的"那个值：要是当前已经指向我们的 core.dll，说明原始状态
+      在更早的时候就被覆盖过（当时没留备份）⇒ 按"原本没有"记。
+      否则收工时会把我们自己的值"还原"回去，等于白擦。
+    """
+    try:
+        if os.path.isfile(IFEO_BACKUP):
+            return
+        cur = ifeo_debugger()
+        mine = bool(cur) and PENGU_CORE.lower() in cur.lower()
+        os.makedirs(os.path.dirname(IFEO_BACKUP), exist_ok=True)
+        with open(IFEO_BACKUP, "w", encoding="utf-8") as f:
+            json.dump({
+                "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "debugger": "" if mine else cur,
+                "existed": False if mine else bool(cur),
+            }, f, ensure_ascii=False, indent=2)
+    except Exception as ex:
+        log("备份 IFEO 失败（忽略）：%s" % ex)
+
+
+def deactivate_pengu() -> str:
+    """收工时**还原** IFEO —— 让客户端回到"没装注入器"的原生状态。返回一句人话。
+
+    幂等：本来就干净、或者指向别人的注入器，都不动。
+    ★ 要写 HKLM ⇒ 靠本 exe 自带的管理员清单（这次 UAC 已经把权限给了）。
+      从源码直接跑、又没提权时，会返回一句失败说明，**不抛**。
+    """
+    try:
+        cur = ifeo_debugger()
+        if not cur:
+            return "IFEO 本来就干净，无需处理"
+        if PENGU_CORE.lower() not in cur.lower():
+            return "IFEO 指向的不是我们（%s）⇒ 不动" % cur[:80]
+        data = {}
+        try:
+            if os.path.isfile(IFEO_BACKUP):
+                with open(IFEO_BACKUP, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+        except Exception:
+            data = {}
+        import winreg
+        if data.get("existed") and data.get("debugger"):
+            with winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE, IFEO_KEY) as k:
+                winreg.SetValueEx(k, "Debugger", 0, winreg.REG_SZ, str(data["debugger"]))
+            return "已还原原来的注入项：%s" % str(data["debugger"])[:100]
+        winreg.DeleteKey(winreg.HKEY_LOCAL_MACHINE, IFEO_KEY)
+        return "已移除注入项 ⇒ 客户端回到未装注入器的状态"
+    except FileNotFoundError:
+        return "注入项本来就不存在"
+    except Exception as ex:
+        return "[!] 还原注入项失败：%s" % str(ex)[:120]
 
 
 def _seed_repair():
@@ -703,6 +773,7 @@ def main():
     if heal == "skip":
         pengu_ok, pengu_msg = False, "注入核心（core.dll）缺失，本次不注入"
     else:
+        backup_ifeo()
         pengu_ok, pengu_msg = ensure_pengu()
     if pengu_ok:
         notify("PRISM 已就绪",
@@ -726,6 +797,7 @@ def main():
     log("客户端已退出 ⇒ 收工（收掉 watcher 和后端）")
     stop_server(server)
     stop_watcher(watcher)
+    log("还原注入项：%s" % deactivate_pengu())
     log("=== launcher exit ===")
     return 0
 
